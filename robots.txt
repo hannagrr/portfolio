@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+# Verweis auf RSL-Lizenzdatei
+License: https://hannagriepentrog.de/license.xml

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanna Griepentrog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg:        #e4e1d9;
+    --ink:       #201f1d;
+    --ink-soft:  #5b564f;
+    --frame:     #4a443d;
+    --mat:       #f4f2ec;
+    --sage-1:    #74847a;   /* Platzhalterfarbe Titelbild */
+    --accent-soft: rgba(168,117,46,.16);
+    --font: 'Rubik', system-ui, -apple-system, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font);
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; }
+
+  :focus-visible{
+    outline: 2px solid var(--bg);
+    outline-offset: 3px;
+  }
+
+  .eyebrow{
+    font-size:.72rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--mat);
+    font-weight:500;
+  }
+
+  /* ---------- Kopfzeile ---------- */
+  .top-mark{
+    position:fixed;
+    top:0; left:0;
+    padding: clamp(18px,4vw,34px);
+    z-index:5;
+    opacity:.8;                  /* leicht durchsichtig, wie die übrigen Texte */
+    mix-blend-mode:difference;   /* bleibt auf hellem & dunklem Bild lesbar */
+  }
+  /* Name nur auf der Startseite zeigen – auf Unterseiten stört er das "Zurück" */
+  body:not(.on-home) .top-mark{ display:none; }
+
+
+
+  /* ---------- Fußzeile ---------- */
+    .site-footer{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    display:flex;
+    justify-content:flex-end;    /* statt space-between → schiebt Inhalt nach rechts */
+    align-items:center;
+    padding: clamp(18px,4vw,34px);
+    pointer-events:none;
+    z-index:5;
+  }
+  /* Footer-Link auf der Kontaktseite selbst ausblenden */
+  body.on-kontakt .site-footer{ display:none; }
+
+  .site-footer a{
+    pointer-events:auto;
+    font-size:.78rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:500;
+    color:var(--ink-soft);
+    position:relative;
+    padding-bottom:4px;
+  }
+  .site-footer a::after{
+    content:"";
+    position:absolute;
+    left:0; bottom:0;
+    width:100%; height:1px;
+    background:var(--bg);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .3s ease;
+  }
+  .site-footer a:hover,
+  .site-footer a:focus-visible{ color:var(--ink); }
+  .site-footer a:hover::after,
+  .site-footer a:focus-visible::after{ transform:scaleX(1); }
+
+  /* Footer auf der Startseite hell einfärben (liegt über dem Bild) */
+  body.on-home .site-footer a{ color:var(--mat); opacity:.8; }
+  body.on-home .site-footer a:hover,
+  body.on-home .site-footer a:focus-visible{ color:var(--mat); opacity:.8; }
+
+
+  /* ---------- Ansichten ---------- */
+  .view{
+    display:none;
+    min-height:100vh;
+  }
+  .view.is-active{ display:block; }
+
+
+    /* ---------- Startseite: Vollflächiges Titelbild ---------- */
+  #view-home{
+    position:relative;
+    min-height:100vh;
+    overflow:hidden;
+    background:var(--sage-1);
+  }
+
+  .hero-bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    z-index:0;
+    display:block;
+  }
+
+  /* Abdunkelndes Overlay – standardmäßig unsichtbar */
+  #view-home::before{
+    content:"";
+    position:absolute; inset:0;
+    z-index:1;
+    background: rgba(20,19,17,.55);
+    opacity:0;
+    transition: opacity .5s ease;
+    pointer-events:none;
+  }
+  /* Wird sichtbar, wenn Body die Klasse trägt (bei Mausbewegung) */
+  body.hero-hover #view-home::before{ opacity:1; }
+
+  .hero-content{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 120px 24px;
+  }
+
+  /* ---------- Unsichtbarer Download-Link mit Text ---------- */
+  .pdf-link{
+    display:inline-block;
+    padding:20px 40px;              /* großzügige, unsichtbare Klickfläche */
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--mat);               /* hellgrau/creme wie Kontakt*/
+    opacity:0;                      /* standardmäßig unsichtbar */
+    transition: opacity .5s ease;
+    cursor:pointer;
+  }
+  /* Bei Mausbewegung eingeblendet – leicht durchsichtig, bleibt auch bei Hover so */
+  body.hero-hover .pdf-link{ opacity:.8; }
+
+
+
+  /* ---------- Unterseiten ---------- */
+  .subpage{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 110px 24px 100px;
+  }
+  .subpage-inner{ width:100%; max-width:560px; }
+
+  .back-link{
+    position:fixed;
+    top:0; left:0;
+    padding: clamp(18px,4vw,34px);
+    font-size:.78rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    z-index:5;
+  }
+  .back-link:hover, .back-link:focus-visible{ color:var(--ink); }
+  .back-link svg{ width:13px; height:13px; transition:transform .25s ease; }
+  .back-link:hover svg{ transform:translateX(-3px); }
+
+  h1.page-title{
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    font-weight:700;
+    margin: 0 0 6px;
+    letter-spacing:-.01em;
+  }
+  .title-rule{
+    width:46px; height:3px;
+    background:var(--bg);
+    border:none;
+    margin: 0 0 34px;
+    border-radius:2px;
+  }
+
+  dl.info-list{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  dl.info-list div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    padding-bottom:18px;
+    border-bottom:1px solid rgba(32,31,29,.1);
+  }
+  dl.info-list dt{
+    font-size:.68rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  dl.info-list dd{
+    margin:0;
+    font-size:1rem;
+    font-weight:500;
+    color:var(--ink);
+  }
+  dl.info-list dd.muted{
+    font-weight:400;
+    color:var(--ink-soft);
+    font-size:.92rem;
+    line-height:1.55;
+  }
+
+  section.block{ margin-top:38px; }
+  section.block h2{
+    font-size:.9rem;
+    font-weight:600;
+    margin:0 0 12px;
+  }
+  section.block p{
+    margin:0 0 12px;
+    color:var(--ink-soft);
+    font-size:.92rem;
+    line-height:1.6;
+  }
+
+  @media (max-width:520px){
+    .site-footer{ font-size:.7rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .pdf-button, .back-link svg, .site-footer a::after{
+      transition:none !important;
+    }
+  }
+
+    /* ---------- Hintergrundbild für Unterseiten ---------- */
+  .subpage{
+    position:relative;
+    overflow:hidden;
+  }
+  .subpage-bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;             /* füllt die Fläche exakt aus, ohne Verzerrung */
+    object-position:center;
+    z-index:0;
+  }
+  /* Helles Overlay, damit der dunkle Text auf dem Bild lesbar bleibt */
+  .subpage::before{
+    content:"";
+    position:absolute; inset:0;
+    z-index:1;
+    background: rgba(244,242,236,.86);   /* helles Mat-Overlay */
+    pointer-events:none;
+  }
+  .subpage-inner{
+    position:relative;
+    z-index:2;                    /* Text liegt über Bild und Overlay */
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="top-mark"><span class="eyebrow">Hanna Griepentrog</span></div>
+
+    <!-- ============ Startseite: Vollflächiges Titelbild + Download bei Mausbewegung ============ -->
+  <main id="view-home" class="view">
+    <img class="hero-bg" src="assets/images/titelbild.webp" alt="">
+    <div class="hero-content">
+      <a class="pdf-link" href="assets/Portfolio_Hanna_Griepentrog.pdf" download="Portfolio.pdf" aria-label="Portfolio als PDF herunterladen">
+        Portfolio
+      </a>
+    </div>
+  </main>
+
+
+  <!-- ============ Kontakt ============ -->
+  <section id="view-kontakt" class="view">
+    <a class="back-link" href="#" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>Zurück</a>
+    <div class="subpage"> 
+      <img class="subpage-bg" src="assets/images/kontakt.webp" alt="">
+            <div class="subpage-inner">
+        <h1 class="page-title" tabindex="-1">Kontakt</h1>
+        <hr class="title-rule">
+
+        <section class="block">
+          <h2>Vita</h2>
+          <p>Seit 2024: wissenschaftliche Mitarbeiterin am Lehrstuhl Darstellungslehre, Fakultät Landschaft und Architektur, TU Dresden
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Künstlerisches Promotionsprojekt zu XR</p>
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;künstlerisch freischaffend</p>
+          <p>2021 - 2023: Softwareentwicklerin bei Robotron Datenbank-Software GmbH</p>
+          <p>2015 - 2021: Studium der Bildenden Kunst, Diplom, Hochschule für Bildende Künste Dresden </p>
+          <p>2008 - 2015:Studium der Mathematik, Diplom, Humboldt-Universität zu Berlin</p>
+          <p>* 1989</p><br><br>
+        </section>
+
+        <dl class="info-list">
+          <div>
+            <dt>E-Mail</dt>
+            <dd><a class="js-mail" href="#" data-user="hannagriepentrog" data-domain="posteo.de">E-Mail anzeigen</a></dd>
+          </div>
+          <div>
+            <dt>Instagram</dt>
+            <dd><a class="js-insta" href="#" data-handle="hannagriepentrog" target="_blank" rel="noopener">Instagram anzeigen</a></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <a href="#kontakt" data-nav="kontakt">Kontakt</a>
+  </footer>
+
+<script>
+  var views = {
+    home: document.getElementById('view-home'),
+    kontakt: document.getElementById('view-kontakt')
+  };
+
+  function route(){
+    var hash = (location.hash || '#home').replace('#','');
+    if(!views[hash]) hash = 'home';
+
+    Object.keys(views).forEach(function(key){
+      views[key].classList.toggle('is-active', key === hash);
+    });
+
+    // Footer-Farbe je nach Ansicht umschalten
+    document.body.classList.toggle('on-home', hash === 'home');
+    document.body.classList.toggle('on-kontakt', hash === 'kontakt');
+
+
+    document.title = hash === 'home' ? 'Portfolio'
+      : hash === 'kontakt' ? 'Kontakt – Portfolio'
+      : 'Impressum – Portfolio';
+
+    if(hash !== 'home'){
+      var heading = views[hash].querySelector('h1');
+      if(heading){ heading.focus({preventScroll:true}); }
+    }
+    window.scrollTo(0,0);
+  }
+
+  document.querySelectorAll('[data-nav="home"]').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      location.hash = '#home';
+    });
+  });
+
+  // Overlay + Schrift nur bei Mausbewegung auf der Startseite zeigen
+  var hoverTimer;
+  function showHero(){
+    if(location.hash && location.hash !== '#home') return; // nur auf Startseite
+    document.body.classList.add('hero-hover');
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(function(){
+      document.body.classList.remove('hero-hover');
+    }, 2500); // nach 2,5 s Ruhe wieder ausblenden
+  }
+  window.addEventListener('mousemove', showHero);
+  // Bei Touch-Geräten dauerhaft sichtbar (kein Mouseover vorhanden)
+  window.addEventListener('touchstart', function(){
+    document.body.classList.add('hero-hover');
+  });
+
+  // E-Mail & Telefon erst clientseitig zusammensetzen (Schutz vor einfachen Harvestern)
+  document.querySelectorAll('.js-mail').forEach(function(el){
+    var addr = el.dataset.user + '@' + el.dataset.domain;
+    el.textContent = addr;
+    el.href = 'mailto:' + addr;
+  });
+  // Instagram-Link erst clientseitig zusammensetzen
+  document.querySelectorAll('.js-insta').forEach(function(el){
+    var handle = el.dataset.handle;
+    el.textContent = '@' + handle;
+    el.href = 'https://instagram.com/' + handle;
+  });
+
+  window.addEventListener('hashchange', route);
+  route();
+</script>
+
+</body>
+</html>
